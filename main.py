@@ -22,13 +22,16 @@ def main():
     env = os.path.join(os.path.abspath(os.curdir), '.env')
     load_dotenv(env)
 
-    mongo_url = os.getenv('MONGOURL')
-    mongo_client = MongoClient(mongo_url)
-    db = mongo_client.sales
-    collection = db['deals']
+    res = re.findall(r'\$\w*|\S?', r"($opportunity + $deal_price) * $count")
 
-    reuslt = list(collection.aggregate(pipeline_generator(json_query)))
-    pprint(reuslt)
+    print(res)
+    # mongo_url = os.getenv('MONGOURL')
+    # mongo_client = MongoClient(mongo_url)
+    # db = mongo_client.sales
+    # collection = db['deals']
+    #
+    # reuslt = list(collection.aggregate(pipeline_generator(json_query)))
+    # pprint(reuslt)
 
 
 def parse_query_option(options: str) -> list:
