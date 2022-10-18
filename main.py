@@ -5,6 +5,7 @@ import os
 from pprint import pprint
 from random import random, randint
 import re
+
 from dotenv import load_dotenv
 
 from pymongo import MongoClient
@@ -23,13 +24,13 @@ def main():
     env = os.path.join(os.path.abspath(os.curdir), '.env')
     load_dotenv(env)
 
-    mongo_url = os.getenv('MONGOURL')
+    mongo_url = os.getenv('MONGO_URL')
     mongo_client = MongoClient(mongo_url)
     db = mongo_client.sales
     collection = db['deals']
 
-    reuslt = list(collection.aggregate(pipeline_generator(json_query)))
-    pprint(reuslt)
+    result = list(collection.aggregate(pipeline_generator(json_query)))
+    pprint(result)
 
 
 def parse_query_option(options: str) -> list:
@@ -38,7 +39,7 @@ def parse_query_option(options: str) -> list:
 
 
 def exp_generator(source_exp: str) -> str:
-    def polsky_calc(sorted_expression: Iterable) -> str:
+    def polski_calc(sorted_expression: Iterable) -> str:
         calc_expression = []
         for sorted_element in sorted_expression:
             if sorted_element in OPERATORS:
@@ -77,7 +78,7 @@ def exp_generator(source_exp: str) -> str:
         res = [elem for elem in res if elem]
         return res
 
-    return polsky_calc(operand_sorter(math_exp_parser(source_exp)))
+    return polski_calc(operand_sorter(math_exp_parser(source_exp)))
 
 
 def pipeline_generator(query_str: str) -> list:
@@ -137,8 +138,8 @@ def data_generator(object_count: int = 100) -> list:
         start_date = datetime(2021, 10, randint(1, 31))
         opportunity = round(randint(100000, 1000000) * random(), 2)
         state = ['fail', 'success'][randint(0, 1)]
-        summ = round(randint(10000, 100000) * random(), 2)
-        collection.append({'date': start_date, 'opportunity': opportunity, 'state': state, 'deal_price': summ})
+        sum_data = round(randint(10000, 100000) * random(), 2)
+        collection.append({'date': start_date, 'opportunity': opportunity, 'state': state, 'deal_price': sum_data})
     return collection
 
 
