@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from datetime import datetime
 import json
 import os
@@ -36,8 +37,8 @@ def parse_query_option(options: str) -> list:
     return list(compare[option] if option in compare else option for option in options.split())
 
 
-def exp_generator(source_exp):
-    def polsky_calc(sorted_expression):
+def exp_generator(source_exp: str) -> str:
+    def polsky_calc(sorted_expression: Iterable) -> str:
         calc_expression = []
         for sorted_element in sorted_expression:
             if sorted_element in OPERATORS:
@@ -51,7 +52,7 @@ def exp_generator(source_exp):
                 calc_expression.append(sorted_element)
         return calc_expression[0]
 
-    def operand_sorter(parsed_formula):
+    def operand_sorter(parsed_formula: list) -> Iterable:
         stack = []
         for token in parsed_formula:
             if token in OPERATORS:
@@ -116,7 +117,7 @@ def pipeline_generator(query_str: str) -> list:
         pipeline.append({'$group': {}})
         pipeline[1]['$group']['_id'] = group_exp
         pipeline[1]['$group']['count'] = {'$sum': 1}
-        calc_members = re.findall(r'\$[\w]+', query['calculate'])
+        calc_members = re.findall(r'\$\w+', query['calculate'])
         for member in calc_members:
             if member != '$count':
                 pipeline[1]['$group'][member[1:]] = {'$sum': member}
@@ -127,7 +128,6 @@ def pipeline_generator(query_str: str) -> list:
         if isinstance(group_field, list) and group_field[0]:
             pipeline.append({'$project': {group_field[0][1:]: '$_id', '_id': 0}})
             pipeline[3]['$project']['calculate'] = json.loads(exp_generator(query['calculate']))
-
     return pipeline
 
 
