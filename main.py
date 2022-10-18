@@ -22,16 +22,13 @@ def main():
     env = os.path.join(os.path.abspath(os.curdir), '.env')
     load_dotenv(env)
 
-    res = re.findall(r'\$\w*|\S?', r"($opportunity + $deal_price) * $count")
+    mongo_url = os.getenv('MONGOURL')
+    mongo_client = MongoClient(mongo_url)
+    db = mongo_client.sales
+    collection = db['deals']
 
-    print(res)
-    # mongo_url = os.getenv('MONGOURL')
-    # mongo_client = MongoClient(mongo_url)
-    # db = mongo_client.sales
-    # collection = db['deals']
-    #
-    # reuslt = list(collection.aggregate(pipeline_generator(json_query)))
-    # pprint(reuslt)
+    reuslt = list(collection.aggregate(pipeline_generator(json_query)))
+    pprint(reuslt)
 
 
 def parse_query_option(options: str) -> list:
@@ -74,20 +71,11 @@ def exp_generator(source_exp):
         while stack:
             yield stack.pop()
 
-    def math_exp_parser(expression_str: str):
-        operand = ''
-        for symbol in expression_str:
-            if (ord('A') <= ord(symbol) <= ord('z')) \
-                    or symbol in '_$' \
-                    or (ord('0') <= ord(symbol) <= ord('9')):
-                operand += symbol
-            elif operand:
-                yield operand
-                operand = ''
-            if symbol in OPERATORS or symbol in '()':
-                yield symbol
-        if operand:
-            yield operand
+    def math_exp_parser(expression_str: str) -> list:
+        res = re.findall(r'\$\w*|\S?', expression_str)
+        res = [elem for elem in res if elem]
+        return res
+
     return polsky_calc(operand_sorter(math_exp_parser(source_exp)))
 
 
