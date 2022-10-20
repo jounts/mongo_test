@@ -74,9 +74,7 @@ def exp_generator(source_exp: str) -> str:
             yield stack.pop()
 
     def math_exp_parser(expression_str: str) -> list:
-        res = re.findall(r'\$\w*|\S?', expression_str)
-        res = [elem for elem in res if elem]
-        return res
+        return re.findall(r'\$[\w]*|\S[+\-*/()]?', expression_str)
 
     return polski_calc(operand_sorter(math_exp_parser(source_exp)))
 
