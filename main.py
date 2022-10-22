@@ -128,7 +128,7 @@ def pipeline_generator(query_str: str) -> list:
         if isinstance(group_field, list) and group_field[0]:
             pipeline.append({'$project': {group_field[0][1:]: '$_id', '_id': 0}})
             pipeline[3]['$project']['calculate'] = json.loads(exp_generator(query['calculate']))
-    print(json.dumps(pipeline, indent=2))
+
     return pipeline
 
 
