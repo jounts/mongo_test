@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 
 OPERATORS = {'+': (1, lambda x, y: '{'+f'"$sum": [{x}, {y}]' + '}'),
-             '-': (1, lambda x, y: '{'+f'"$subtract": [{x}, {y}]' + '}'),
+                 '-': (1, lambda x, y: '{'+f'"$subtract": [{x}, {y}]' + '}'),
              '*': (2, lambda x, y: '{'+f'"$multiply": [{x}, {y}]' + '}'),
              '/': (2, lambda x, y: '{'+f'"$divide": [{x}, {y}]' + '}')}
 
@@ -29,7 +29,11 @@ def main():
     db = mongo_client.sales
     collection = db['deals']
 
-    result = list(collection.aggregate(pipeline_generator(json_query)))
+    pipeline = pipeline_generator(json_query)
+
+    print(json.dumps(pipeline, indent=2))
+
+    result = list(collection.aggregate(pipeline))
     pprint(result)
 
 
@@ -93,10 +97,7 @@ def pipeline_generator(query_str: str) -> list:
                     filter_value = float(filter_value)
                 except ValueError:
                     pass
-                if filter_condition == "$eq":
-                    pipeline[0]["$match"]["$and"].append({filter_operator[1:]: filter_value})
-                else:
-                    pipeline[0]["$match"]["$and"].append({filter_operator[1:]: {filter_condition: filter_value}})
+                pipeline[0]["$match"]["$and"].append({filter_operator[1:]: {filter_condition: filter_value}})
         else:
             filter_operator, filter_condition, filter_value = parse_query_option(query['filters'][0])
             try:
@@ -127,6 +128,7 @@ def pipeline_generator(query_str: str) -> list:
         if isinstance(group_field, list) and group_field[0]:
             pipeline.append({'$project': {group_field[0][1:]: '$_id', '_id': 0}})
             pipeline[3]['$project']['calculate'] = json.loads(exp_generator(query['calculate']))
+    print(json.dumps(pipeline, indent=2))
     return pipeline
 
 
